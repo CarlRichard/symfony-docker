@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Maison{% endblock %}
+
+{% block body %}
+
+	<h1>Les maisons</h1>
+	{% for maison in maisons %}
+
+		<p>{{maison.id}} ,Ville : {{maison.adress}}</p>
+
+		{% for proprietaire in maison.proprietaire %}
+			<p>Proprietaire :{{ proprietaire.name }} {{ proprietaire.lastname }}</p>
+		{% endfor %}
+        
+        {# sans la boucle je n'ai pas le conjoint  #}
+        {# <p>Proprio via les fonctions get et current :{{ maison.getProprietaire().current().name }} {{ maison.getProprietaire().current().lastname }}</p> #}
+
+	{% endfor %}
+
+{% endblock %}
+

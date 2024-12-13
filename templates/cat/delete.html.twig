@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Abandonner un chat</h1>
+
+    {{ form_start(form) }}
+        {{ form_row(form.cat_name) }}
+        <button class="btn" type="submit">Abandonner </button>
+    {{ form_end(form) }}
+
+    {% if message is not null %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+    {% endif %}
+{% endblock %}

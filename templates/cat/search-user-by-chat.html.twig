@@ -1,0 +1,14 @@
+{# templates/user/search-user-by-chat.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche propriétaire{% endblock %}
+
+{% block body %}
+    <h1>Rechercher le propriétaire</h1>
+
+    {{ form_start(form) }}
+        {{ form_row(form.cat_name) }}
+        <button class="btn"> Rechercher </button>
+    {{ form_end(form) }}
+        <p>Propriétaire : {{ maitreName }}</p>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello CatController!{% endblock %}
+
+{% block body %}
+
+
+<h1>Les Chats :</h1>
+
+{% for cat in cats %}
+    {% for user in cat.adoption %}
+        <strong> Maitre :</strong> {{ user.name }} {{ user.lastname }}
+    {% endfor %}
+    <p>
+        {# uploads #}
+        <img id="chat-sprite" src="{{ asset('uploads/cats/' ~ cat.img  ) }}" alt="cat Sprite" style="width: 200px;" />
+
+        {# si ajout manuel au dossier spites #}
+        {# <img id="chat-sprite" src="{{ asset('images/sprites/' ~ cat.img ~ '.png') }}" alt="cat Sprite" style="width: 200px;" /> #}
+    </p>
+    <p>{{cat.id}}: {{cat.name}} , {{cat.genre}} de {{ cat.age }} ans , </p>
+    <span> ________________________________________</span><br>
+    {# Maitre : {{ cat.getAdopts().current().user.name }} {{ cat.getAdopts().current().user.lastname }} #}
+{% endfor %}
+
+
+{% endblock %}  

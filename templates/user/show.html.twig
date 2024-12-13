@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partenaire de {{ user.name }}{% endblock %}
+
+{% block body %}
+    <h1>Informations sur {{ user.name }} {{ user.lastName }}</h1>
+
+    {% if partner %}
+        <h2>Partenaire :</h2>
+        <p><strong>Nom complet :</strong> {{ partner.name }} {{ partner.lastName }}</p>
+        <p><strong>Âge :</strong> {{ partner.age }} ans</p>
+    {% else %}
+        <p><strong>Statut :</strong> Pas de partenaire</p>
+    {% endif %}
+
+    <a href="{{ path('app_user') }}">Retour </a>
+{% endblock %}

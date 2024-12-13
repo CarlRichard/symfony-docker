@@ -1,0 +1,266 @@
+{% block body %}
+	<link rel="stylesheet" href="{{ asset('css/styles.css') }}"/>
+
+	<h1>Arène</h1>
+
+	<div
+		id="battle-status">
+		<div id="hero-status">
+			<h2>
+				<span id="hero-name">{{ hero.nom }}</span>
+			</h2>
+			<img id="hero-sprite" src="{{ asset('images/sprites/hero_' ~ hero.img ~ '.png') }}" alt="Hero Sprite"/>
+			<p id="hero-stats">
+				<span id="hero-pv">
+				Pv: {{ hero.pv }}</span><br>
+				Attaque: {{ hero.attaque }}<br>
+				Défense: {{ hero.defense }}<br>
+				Vitesse: {{ hero.vitesse }}
+			</p>
+			<p id="hero-defeated" style="display: none;">Hero :
+				{{ hero.nom }}
+				est vaincu</p>
+		</div>
+
+		<div id="monster-status">
+			<h2>
+				<span id="monster-name">{{ monster.nom }}</span>
+			</h2>
+			<img id="monster-sprite" src="{{ asset('images/sprites/monster_' ~ monster.img ~ '.png') }}" alt="Monster Sprite"/>
+			<p id="monster-stats">
+				<span id="monster-pv">Pv:
+					{{ monster.pv }}</span><br>
+				Attaque:
+				{{ monster.attaque }}<br>
+				Défense:
+				{{ monster.defense }}<br>
+				Vitesse:
+				{{ monster.vitesse }}
+			</p>
+			<p id="monster-defeated" style="display: none;">Monster :
+				{{ monster.nom }}
+				est vaincu</p>
+		</div>
+	</div>
+
+	<div id="battle-info">
+		<h3 id="turn-status">C'est le tour du
+			<span id="current-turn">Hero</span>
+		</h3>
+	</div>
+
+	<div
+		id="battle-actions">
+		<!-- Boutons d'actions -->
+		<button id="attack-btn">Attaquer</button>
+		<button id="technique-btn">Technique</button>
+		<button id="item-btn">Objet</button>
+		<button id="flee-btn">Fuir</button>
+	</div>
+
+	<div id="battle-log">
+		<h3>Historique de combat :</h3>
+		<p id="log"></p>
+	</div>
+
+	<!-- Menus déroulants cachés pour Technique et Objet -->
+	<div id="technique-menu" style="display: none;">
+		{% if hero.classe and hero.classe.techniques is not empty %}
+			<ul>
+				{% for technique in hero.classe.techniques %}
+					<li>
+						{{ technique.nom }}
+						<button data-technique-id="{{ technique.id }}" class="use-technique-btn">Utiliser</button>
+					</li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<p>Aucune technique disponible pour ce héros.</p>
+		{% endif %}
+	</div>
+
+	<div id="item-menu" style="display: none;">
+		<h4>Objets</h4>
+		<ul>
+			{% for item in hero.objet %}
+				<li>
+					{{ item.nom }}
+					- Effet:
+					{{ item.effet }}
+					<button data-item-id="{{ item.id }}" class="use-item-btn">Utiliser</button>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
+
+	{% block scripts %}
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+const log = document.getElementById('log');
+const techniqueMenu = document.getElementById('technique-menu');
+const itemMenu = document.getElementById('item-menu');
+const currentTurn = document.getElementById('current-turn');
+const turnStatus = document.getElementById('turn-status');
+const heroPvDisplay = document.getElementById('hero-pv');
+const monsterPvDisplay = document.getElementById('monster-pv');
+const heroStatus = document.getElementById('hero-status');
+const monsterStatus = document.getElementById('monster-status');
+const heroDefeated = document.getElementById('hero-defeated');
+const monsterDefeated = document.getElementById('monster-defeated');
+const heroName = document.getElementById('hero-name');
+const monsterName = document.getElementById('monster-name');
+
+const hero = {
+nom: "{{ hero.nom }}",
+pv: {{ hero.pv }},
+attaque: {{ hero.attaque }},
+defense: {{ hero.defense }},
+vitesse: {{ hero.vitesse }},
+techniques: [{% for technique in hero.classe.techniques %}
+{
+id: "{{ technique.id }}",
+nom: "{{ technique.nom }}"
+},{% endfor %}]
+};
+
+const monster = {
+nom: "{{ monster.nom }}",
+pv: {{ monster.pv }},
+attaque: {{ monster.attaque }},
+defense: {{ monster.defense }},
+vitesse: {{ monster.vitesse }},
+techniques: [{% for technique in monster.techniques %}
+{
+id: "{{ technique.id }}",
+nom: "{{ technique.nom }}"
+},{% endfor %}]
+};
+
+let isHeroTurn = hero.vitesse >= monster.vitesse;
+
+function appendLog(message) {
+log.innerHTML += `<p>${message}</p>`;
+}
+
+function checkBattleStatus() { // Vérification du statut de la bataille (si un combattant est vaincu)
+if (monster.pv<= 0) {
+                    appendLog(`${monster.nom} est vaincu! ${hero.nom} gagne le combat!`);
+                    monsterDefeated.style.display = 'block'; // Affiche "Vaincu" pour le monstre
+                    monsterStatus.style.display = 'block';
+                    disableActions();
+                } else if (hero.pv <= 0) {
+                    appendLog(`${hero.nom} est vaincu! ${monster.nom} gagne le combat!`);
+                    heroDefeated.style.display = 'block'; // Affiche "Vaincu" pour le héros
+                    heroStatus.style.display = 'block';
+                    disableActions();
+                }
+            }
+
+            // Mise à jour des PV
+            function updatePv() {
+                if (hero.pv <= 0) {
+                    heroPvDisplay.innerHTML = `Pv: 0`; // Remplacer le negatif par zéro
+                } else {
+                    heroPvDisplay.innerHTML = `Pv: ${hero.pv}`;
+                }
+
+                if (monster.pv <= 0) {
+                    monsterPvDisplay.innerHTML = `Pv: 0`;
+                } else {
+                    monsterPvDisplay.innerHTML = `Pv: ${monster.pv}`;
+                }
+            }
+
+            // Action Attaquer
+            document.getElementById('attack-btn').addEventListener('click', function () {
+                if (isHeroTurn) {
+                    const baseDamage = Math.max(0, hero.attaque - monster.defense);
+                    const variation = baseDamage * 0.15;  // + ou - 15% de degat de variation
+                    const damage = Math.max(0, Math.floor(baseDamage + (Math.random() * 2 - 1) * variation));
+                    monster.pv -= damage;
+                    appendLog(`${hero.nom} attaque ${monster.nom} pour ${damage} dégâts!`);
+                    updatePv();
+                } else {
+                    const baseDamage = Math.max(0, monster.attaque - hero.defense);
+                    const variation = baseDamage * 0.15; 
+                    const damage = Math.max(0, Math.floor(baseDamage + (Math.random() * 2 - 1) * variation));
+                    hero.pv -= damage;
+                    appendLog(`${monster.nom} attaque ${hero.nom} pour ${damage} dégâts!`);
+                    updatePv();
+                }
+                checkBattleStatus();
+                isHeroTurn = !isHeroTurn;
+                currentTurn.innerText = isHeroTurn ? hero.nom : monster.nom;
+                turnStatus.style.display = 'block';
+            });
+
+            // Action Technique
+            document.getElementById('technique-btn').addEventListener('click', function () {
+                techniqueMenu.style.display = 'block';
+            });
+
+            // Utilisation d'une Technique
+            document.querySelectorAll('.use-technique-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    if (isHeroTurn) {
+                    const techniqueId = button.getAttribute('data-technique-id');
+                    const damage = 50; // modif avec le coeff
+                    monster.pv -= damage;
+                    appendLog(`${hero.nom} utilise : ${techniqueId} pour ${damage} dégâts!`);
+                    updatePv();
+                    techniqueMenu.style.display = 'none';    
+                    }else{
+                    const techniqueId = button.getAttribute('data-technique-id');
+                    const damage = 50; // modif avec le coeff
+                    hero.pv -= damage;
+                    appendLog(`${monster.nom} utilise : ${techniqueId} pour ${damage} dégâts!`);
+                    updatePv();
+                    techniqueMenu.style.display = 'none';  
+                    }
+
+                    checkBattleStatus();
+                    isHeroTurn = !isHeroTurn;
+                    currentTurn.innerText = isHeroTurn ? hero.nom : monster.nom;
+                    turnStatus.style.display = 'block'; // Affiche le texte du tour de jeu
+                });
+            });
+
+            // Action Objet
+            document.getElementById('item-btn').addEventListener('click', function () {
+                itemMenu.style.display = 'block';
+            });
+
+            // Utilisation d'un Objet
+            document.querySelectorAll('.use-item-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    hero.pv += 20; 
+                    appendLog(`${hero.nom} utilise un objet et récupère 20 PV!`);
+                    updatePv();
+                    itemMenu.style.display = 'none';
+                    isHeroTurn = !isHeroTurn;
+                    currentTurn.innerText = isHeroTurn ? hero.nom : monster.nom;
+                    turnStatus.style.display = 'block'; // Affiche le texte du tour de jeu
+                });
+            });
+
+            // Action Fuir
+            document.getElementById('flee-btn').addEventListener('click', function () {
+                appendLog(`${hero.nom} a fui le combat!`);
+                setTimeout(() => {
+                    window.location.href = '/game';
+                }, 2000);
+            });
+
+            function disableActions() {
+                document.getElementById('battle-actions').querySelectorAll('button').forEach(button => {
+button.disabled = true;
+}) 
+
+turnStatus.style.display = 'none';
+
+}
+});
+		</script>
+	{% endblock %}
+{% endblock %}
+

@@ -1,0 +1,79 @@
+{% block body %}
+    <h1>Game Arena</h1>
+
+    <div style="display: flex; justify-content: space-between;">
+        <!-- Liste des héros -->
+        <div style="width: 45%; border: 1px solid #ccc; padding: 10px;">
+            <h2>Heroes</h2>
+            <ul>
+                {% for hero in heroes %}
+                    <li>
+                        {{ hero.nom }} <a href="#" data-hero-id="{{ hero.id }}" class="select-hero"> Choisir </a>
+                    </li>
+                {% else %}
+                    <li>erreur choix hero</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div style="width: 45%; border: 1px solid #ccc; padding: 10px;">
+            <h2>Monsters</h2>
+            <ul>
+                {% for monster in monsters %}
+                    <li>
+                        {{ monster.nom }} <a href="#" data-monster-id="{{ monster.id }}" class="select-monster"> Choisir </a>
+                    </li>
+                {% else %}
+                    <li>erreur</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <form id="battle-form" action="" method="get" style="margin-top: 20px; display: none;">
+        <input type="hidden" name="heroId" id="hero-id" value="">
+        <input type="hidden" name="monsterId" id="monster-id" value="">
+        <button type="submit">Start Battle!</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const heroLinks = document.querySelectorAll('.select-hero');
+            const monsterLinks = document.querySelectorAll('.select-monster');
+            const form = document.getElementById('battle-form');
+            const heroInput = document.getElementById('hero-id');
+            const monsterInput = document.getElementById('monster-id');
+
+            let selectedHero = null;
+            let selectedMonster = null;
+
+            // Sélectionner un héros
+            heroLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    selectedHero = this.dataset.heroId;
+                    heroInput.value = selectedHero;
+                    checkSelection();
+                });
+            });
+
+            // Sélectionner un monstre
+            monsterLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    selectedMonster = this.dataset.monsterId;
+                    monsterInput.value = selectedMonster;
+                    checkSelection();
+                });
+            });
+
+            // Vérifie si les deux entités sont sélectionnées
+            function checkSelection() {
+                if (selectedHero && selectedMonster) {
+                    form.action = `/battle/${selectedHero}/${selectedMonster}`;
+                    form.style.display = 'block';
+                }
+            }
+        });
+    </script>
+{% endblock %}

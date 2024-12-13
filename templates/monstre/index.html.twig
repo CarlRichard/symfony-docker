@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Monstre index{% endblock %}
+
+{% block body %}
+    <h1>Monstre index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Pv</th>
+                <th>Attaque</th>
+                <th>Defense</th>
+                <th>Vitesse</th>
+                <th>Element</th>
+                <th>actions</th>
+                <th>image</th>
+
+            </tr>
+        </thead>
+        <tbody>
+        {% for monstre in monstres %}
+            <tr>
+                <td>{{ monstre.id }}</td>
+                <td>{{ monstre.nom }}</td>
+                <td>{{ monstre.pv }}</td>
+                <td>{{ monstre.attaque }}</td>
+                <td>{{ monstre.defense }}</td>
+                <td>{{ monstre.vitesse }}</td>
+                <td>{{ monstre.Element }}</td>
+                <td>{{ monstre.img }}</td>
+                <td>
+                    <a href="{{ path('app_monstre_show', {'id': monstre.id}) }}">show</a>
+                    <a href="{{ path('app_monstre_edit', {'id': monstre.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_monstre_new') }}">Create new</a>
+{% endblock %}
